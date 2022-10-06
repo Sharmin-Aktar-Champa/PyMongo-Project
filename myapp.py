@@ -1,10 +1,11 @@
 import pymongo
 import certifi
 from flask import Flask, request, jsonify, json
+from datetime import timezone
+import datetime
 
 client = pymongo.MongoClient("mongodb+srv://sharmin-02:HqK39MyaCeWjNuD1@cluster0.alwppg4.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
 db = client["mydb"]
-
 
 app =  Flask(__name__)
 @app.route("/jokes", methods=["GET"])
@@ -18,6 +19,14 @@ def mymethod():
 @app.route("/post/env", methods=["POST"])
 def setEnv():
     data = json.loads(request.data)
+    # print(type(data))
+    # Get current timestamp and convert it to standard timestamp
+    dt = datetime.datetime.now(timezone.utc)
+    utc_time = dt.replace(tzinfo=timezone.utc)
+    utc_timestamp = utc_time.timestamp()
+    timestamp = {"timestamp": utc_timestamp} 
+    data.update(timestamp) 
+    # print(data)
     db.environmental_data.insert_one(data)
     return jsonify({"message" : "data insertion was successful"})
 
